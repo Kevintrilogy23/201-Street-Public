@@ -2,8 +2,6 @@ name: Build Android APK
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ main ]
 
 jobs:
   build:
@@ -11,7 +9,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install dependencies
         run: |
@@ -27,14 +25,23 @@ jobs:
           haxelib install flixel-addons
           haxelib install flixel-ui
           haxelib install hscript
-          haxelib install hxCodec
           haxelib install actuate
+          haxelib install hxCodec
 
       - name: Android setup
         run: |
           haxelib run lime setup android --accept
 
       - name: Build APK
+        run: |
+          haxelib run lime build android -release
+
+      - name: Upload APK (NEW v4)
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: |
+            export/release/android/bin/**/*.apk      - name: Build APK
         run: |
           haxelib run lime build android -release
 
