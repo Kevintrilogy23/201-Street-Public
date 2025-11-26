@@ -1,0 +1,44 @@
+name: Build-Android
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install Haxe
+        uses: krdlab/setup-haxe@v1
+        with:
+          haxe-version: 4.2.5
+
+      - name: Install Haxelibs
+        run: |
+          haxelib install lime 7.9.0
+          haxelib install openfl 9.2.1
+          haxelib install flixel 5.6.0
+          haxelib install flixel-addons
+          haxelib install flixel-ui
+          haxelib install hscript
+          haxelib git hscript-iris https://github.com/nebulazorua/hscript-iris.git
+          haxelib run lime setup
+
+      - name: Setup Android
+        run: |
+          haxelib run lime setup android
+          yes | sdkmanager "platforms;android-33"
+          yes | sdkmanager "build-tools;33.0.0"
+
+      - name: Build APK
+        run: |
+          haxelib run lime build android -release
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: Mod-Android
+          path: export/release/android/bin/app-release.apk
